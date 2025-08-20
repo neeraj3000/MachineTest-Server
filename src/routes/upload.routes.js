@@ -1,3 +1,4 @@
+// Admin-only upload route: accepts CSV/XLSX, parses rows, and distributes tasks to agents
 const { Router } = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -9,9 +10,11 @@ const { parseCsvOrExcel } = require('../utils/uploadParser');
 
 const router = Router();
 
+// Ensure upload directory exists
 const uploadDir = process.env.UPLOAD_DIR || path.resolve(process.cwd(), 'server', 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
+// Configure multer to save files to disk with a safe unique name
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
@@ -23,6 +26,7 @@ const storage = multer.diskStorage({
   }
 });
 
+// Only allow CSV and Excel files
 function fileFilter(req, file, cb) {
   const allowed = ['.csv', '.xlsx', '.xls'];
   const ext = path.extname(file.originalname).toLowerCase();
@@ -34,13 +38,14 @@ function fileFilter(req, file, cb) {
 
 const upload = multer({ storage, fileFilter });
 
+// Upload a file, parse rows, distribute tasks round-robin among up to 5 agents, and return summary
 router.post('/', authenticate, authorize('ADMIN'), upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'File is required' });
 
     const items = await parseCsvOrExcel(req.file.path);
 
-    // Validate required fields in items
+    // Normalize and validate required fields in items
     const normalized = items
       .map((row) => ({
         firstName: String(row.FirstName || row.firstName || '').trim(),
@@ -65,7 +70,7 @@ router.post('/', authenticate, authorize('ADMIN'), upload.single('file'), async 
 
     await Task.insertMany(tasksToCreate);
 
-    // Build response per agent
+    // Build response per agent for client display
     const byAgent = await Task.aggregate([
       { $match: { agent: { $in: distributionAgents.map((a) => a._id) } } },
       { $sort: { createdAt: -1 } },

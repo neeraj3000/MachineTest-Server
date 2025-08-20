@@ -1,3 +1,4 @@
+// Auth routes: login to receive JWT, and /me to get current user
 const { Router } = require('express');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
@@ -6,6 +7,7 @@ const { authenticate } = require('../middleware/auth');
 
 const router = Router();
 
+// Login with email and password to receive a JWT
 router.post(
   '/login',
   [body('email').isEmail(), body('password').isLength({ min: 6 })],
@@ -31,6 +33,7 @@ router.post(
   }
 );
 
+// Return the authenticated user's profile
 router.get('/me', authenticate, async (req, res) => {
   return res.json({ user: req.user });
 });

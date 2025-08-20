@@ -1,3 +1,4 @@
+// Database helper: connects to MongoDB once and reuses the connection
 const mongoose = require('mongoose');
 require('dotenv').config();  
 let isConnected = false;

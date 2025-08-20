@@ -1,3 +1,4 @@
+// Task model: represents a single contact/task assigned to an agent
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema(

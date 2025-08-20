@@ -1,3 +1,4 @@
+// Script to create an initial ADMIN user using environment variables
 const path = require('path');
 const dotenv = require('dotenv');
 const { connectToDatabase } = require('../src/utils/db');

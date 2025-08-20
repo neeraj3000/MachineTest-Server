@@ -1,6 +1,8 @@
+// Authentication and authorization middleware
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Verifies JWT from Authorization header and loads the user onto req.user
 async function authenticate(req, res, next) {
   try {
     const authHeader = req.headers.authorization || '';
@@ -11,6 +13,7 @@ async function authenticate(req, res, next) {
     const user = await User.findById(payload.userId).select('-password');
     if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
+    // Attach the user to the request for downstream handlers
     req.user = user;
     next();
   } catch (err) {
@@ -18,6 +21,7 @@ async function authenticate(req, res, next) {
   }
 }
 
+// Ensures the authenticated user has one of the allowed roles
 function authorize(...roles) {
   return (req, res, next) => {
     if (!req.user || (roles.length && !roles.includes(req.user.role))) {

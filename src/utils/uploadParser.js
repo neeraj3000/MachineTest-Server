@@ -1,8 +1,10 @@
+// Helpers to parse CSV and Excel files into JSON rows
 const fs = require('fs');
 const { parse } = require('csv-parse');
 const XLSX = require('xlsx');
 const path = require('path');
 
+// Detect file extension and route to the correct parser
 async function parseCsvOrExcel(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === '.csv') {
@@ -14,6 +16,7 @@ async function parseCsvOrExcel(filePath) {
   throw new Error('Unsupported file');
 }
 
+// Parse CSV file into an array of objects
 function parseCsv(filePath) {
   return new Promise((resolve, reject) => {
     const rows = [];
@@ -25,6 +28,7 @@ function parseCsv(filePath) {
   });
 }
 
+// Parse first worksheet in an Excel workbook into an array of objects
 function parseExcel(filePath) {
   const workbook = XLSX.readFile(filePath);
   const sheetName = workbook.SheetNames[0];

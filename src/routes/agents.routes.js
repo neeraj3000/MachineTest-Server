@@ -1,3 +1,4 @@
+// Admin-only routes to list, create, update, and delete agents
 const { Router } = require('express');
 const { body, param, validationResult } = require('express-validator');
 const User = require('../models/User');
@@ -6,13 +7,16 @@ const { authenticate, authorize } = require('../middleware/auth');
 
 const router = Router();
 
+// All routes below require ADMIN role
 router.use(authenticate, authorize('ADMIN'));
 
+// List all agents (password excluded)
 router.get('/', async (req, res) => {
   const agents = await User.find({ role: 'AGENT' }).select('-password');
   res.json({ agents });
 });
 
+// Create a new agent
 router.post(
   '/',
   [
@@ -81,7 +85,7 @@ router.put(
   }
 );
 
-// Delete agent (and their tasks)
+// Delete agent and cascade delete their tasks
 router.delete(
   '/:id',
   [param('id').isMongoId()],

@@ -1,3 +1,4 @@
+// User model: supports roles ADMIN and AGENT, stores hashed passwords
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -12,6 +13,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Hash password if it has been modified
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
@@ -19,6 +21,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+// Compare a plain password to the stored hash
 userSchema.methods.comparePassword = async function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };
