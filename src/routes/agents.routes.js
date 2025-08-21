@@ -24,7 +24,7 @@ router.post(
     body('email').isEmail().normalizeEmail(),
     body('mobile')
       .isString()
-      .matches(/^\+[0-9]{10,15}$/)
+      .matches(/^[0-9]{10}$/)
       .withMessage('Mobile must be in E.164 format like +15551234567'),
     body('password')
       .isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })
